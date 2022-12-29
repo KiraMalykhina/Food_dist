@@ -119,8 +119,10 @@ window.addEventListener('DOMContentLoaded', () => {
             modal.classList.add('show');
             modal.classList.remove('hide');
             // modal.classList.toggle('show');
+             //убирает прокрутку стр.сайта, когда появля. мод.окно
             document.body.style.overflow = 'hidden'; 
-            //убирает прокрутку стр.сайта, когда появля. мод.окно
+            //если user сам откр. мод.окно, то мы интервал очиститься 
+            clearInterval(modalTimerId);
     }
 
     function closeModal() {
@@ -144,9 +146,27 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     //мод.окно закрывает при нажати клавиши  esc
     document.addEventListener('keydown', (e) => {
-        if(e.code === "Escape" && modal.classList.contains('show')) { // мод. окно реагир. на esc, только когда оно откр.
+        if(e.code === "Escape" && modal.classList.contains('show')) { // мод. окно реагир. на esc, только когда open.
             closeModal();
         }
     });
+
+    //устанавливаем чтобы мод.окно появлялось через 10 сек.
+
+    const modalTimerId = setTimeout(showModal, 5000); //сюда ф-ю по открытию мод.окна
+
+    //set если user scroll стр. до конца, то появл. мод.окно
+
+    function showModalByscroll() {
+        //отслеж. момент , когла user долистай стр. до конца (свойство за прокротку, свойста клиента и будем ее сравнивать  со scrollhigth);
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight -1) {
+            showModal();
+            window.removeEventListener('scroll', showModalByscroll);
+        }
+    }
+
+    window.addEventListener('scroll', showModalByscroll);
+    
+
 
 });
