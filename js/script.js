@@ -60,7 +60,7 @@ window.addEventListener('DOMContentLoaded', () => {
             days = Math.floor(t/(24*3600*1000)),
             hours =Math.floor(t/(3600*1000)%24),
             minutes=Math.floor((t/1000/60) %60),
-            seconds = Math.floor((t/1000)%60);
+            seconds = Math.floor((t/1000) % 60);
         }
 
         return {
@@ -106,5 +106,47 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    setClock('.timer', deadline);   
+    setClock('.timer', deadline);  
+
+    
+    //modal
+
+    const btn = document.querySelectorAll('[data-modal]'),
+          close = document.querySelector('[data-close]'),
+          modal = document.querySelector('.modal');
+          
+    function showModal () { 
+            modal.classList.add('show');
+            modal.classList.remove('hide');
+            // modal.classList.toggle('show');
+            document.body.style.overflow = 'hidden'; 
+            //убирает прокрутку стр.сайта, когда появля. мод.окно
+    }
+
+    function closeModal() {
+        modal.classList.add('hide');
+        modal.classList.remove('show');
+        // modal.classList.toggle('show');
+        document.body.style.overflow = ''; // браузер сам решит, что лучше подаставить
+    }
+    /* Перебираем массив кнопок */ 
+    btn.forEach(function(item) {
+        item.addEventListener('click', showModal);    
+    });
+
+    close.addEventListener('click', closeModal);
+
+    // По клику в области подложки будет закрваться мод.окно
+    modal.addEventListener('click', (e) => {
+        if(e.target ===modal) {
+            closeModal();
+        }
+    });
+    //мод.окно закрывает при нажати клавиши  esc
+    document.addEventListener('keydown', (e) => {
+        if(e.code === "Escape" && modal.classList.contains('show')) { // мод. окно реагир. на esc, только когда оно откр.
+            closeModal();
+        }
+    });
+
 });
