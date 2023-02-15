@@ -192,8 +192,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
             const element = document.createElement('div');
             if (this.classes.length === 0){ // если не был передан ни один класс , то мы добавляем такой класс
-                this.element = 'menu__item';
-                element.classList.add(this.element);
+                this.classes = 'menu__item';
+                element.classList.add(this.classes);
             }else {
             this.classes.forEach(className => element.classList.add(className));  
             }
