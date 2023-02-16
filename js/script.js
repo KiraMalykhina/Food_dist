@@ -153,7 +153,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //устанавливаем чтобы мод.окно появлялось через 10 сек.
 
-    // const modalTimerId = setTimeout(showModal, 5000); //сюда ф-ю по открытию мод.окна
+    const modalTimerId = setTimeout(showModal, 5000); //сюда ф-ю по открытию мод.окна
 
     //set если user scroll стр. до конца, то появл. мод.окно
 
@@ -241,5 +241,84 @@ window.addEventListener('DOMContentLoaded', () => {
         ".menu .container",
         'menu__item'
     ).render();
+
+
+    //Forms 
+
+    const forms = document.querySelectorAll('form'); //получ. все формы котор. есть на стр.-e
+
+    const message = {
+        loading: 'Загрузка',
+        success: 'Спасибо! Скоро мы  с вами свяжемся',
+        failure: 'Что-то пошло не так...'
+    };
+
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    //Создаем ф-ю котор. отвечает за постинг данных
+    function postData(form) {
+        form.addEventListener('submit', (e) =>{
+           e.preventDefault(); //запуск, чтобы отменмть стандарт. поведение обраузера(ч.б перезагрузки стр. не было)
+           //эта команда в запросах AJAX должна идти в  самом начале
+           
+           const statusMessage = document.createElement('div');
+           statusMessage.classList.add('status');
+           statusMessage.textContent = message.loading;
+           form.appendChild(statusMessage);
+
+           const request = new XMLHttpRequest();
+           request.open('POST', 'server.php');
+  
+// 1 способ using FormData
+        //!!!когда использ. связку new XMLHttpRequest() + new FormData() - то заголовок НЕНУЖНО устанавливать
+         //т.к заголовок устанавл. автоматически,если устаровить .setRequestHeader(), то будет ошибка 
+        //FormData() -обьект , котор. подготавливает данные для отправки из формы
+        //    const formData = new FormData(form); //!ВАЖНО проверять в верстке,чтобы в input ВСЕГДА был указан атрибут name=""
+        //    request.send(formData);
+
+        //    request.addEventListener('load', () =>  {
+        //        if (request.status=== 200){
+        //           console.log(request.response);
+        //           statusMessage.textContent=message.success;
+        //           form.reset(); //очищаем форму
+        //           setTimeout(() =>{
+        //              statusMessage.remove();
+        //           }, 3000);
+        //        }else{
+        //         statusMessage.textContent=message.failure;
+        //        }
+        //    });
+
+// 2 способ using JSON + FormData  
+        
+           request.setRequestHeader('Content-type', 'application/json' );//ч.б получить данные на JSON + php нужно добавить запись в file 'server.php'
+
+           const formData = new FormData(form);//!ВАЖНО проверять в верстке,чтобы в input ВСЕГДА был указан атрибут name=""
+        
+           const object = {};
+           formData.forEach(function(value, key) {  // получаем обычный обьект из FormData()
+                object[key] = value;
+           });
+           const json = JSON.stringify(object); //Превращаем обычный обьект в формат JSON
+        
+           request.send(json);
+
+           request.addEventListener('load', () =>  {
+             if  (request.status=== 200){
+                 console.log(request.response);
+                 statusMessage.textContent=message.success;
+                 form.reset(); //очищаем форму
+                 setTimeout(() =>{
+                     statusMessage.remove();
+             }, 3000);
+             }else{
+                statusMessage.textContent=message.failure;
+             }
+          });
+
+        });
+    }
 
 });
