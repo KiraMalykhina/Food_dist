@@ -112,18 +112,12 @@ window.addEventListener('DOMContentLoaded', () => {
     //modal
 
     const btn = document.querySelectorAll('[data-modal]'),
-          close = document.querySelector('[data-close]'),
           modal = document.querySelector('.modal');
-          
-    function showModal () { 
-            modal.classList.add('show');
-            modal.classList.remove('hide');
-            // modal.classList.toggle('show');
-             //убирает прокрутку стр.сайта, когда появля. мод.окно
-            document.body.style.overflow = 'hidden'; 
-            //если user сам откр. мод.окно, то мы интервал очиститься 
-            clearInterval(modalTimerId);
-    }
+
+    //* Перебираем массив кнопок */ 
+    btn.forEach(function(item) {
+        item.addEventListener('click', showModal);    
+    });
 
     function closeModal() {
         modal.classList.add('hide');
@@ -131,19 +125,25 @@ window.addEventListener('DOMContentLoaded', () => {
         // modal.classList.toggle('show');
         document.body.style.overflow = ''; // браузер сам решит, что лучше подаставить
     }
-    /* Перебираем массив кнопок */ 
-    btn.forEach(function(item) {
-        item.addEventListener('click', showModal);    
-    });
 
-    close.addEventListener('click', closeModal);
+    function showModal () { 
+        modal.classList.add('show');
+        modal.classList.remove('hide');
+        // modal.classList.toggle('show');
+         //убирает прокрутку стр.сайта, когда появля. мод.окно
+        document.body.style.overflow = 'hidden'; 
+        //если user сам откр. мод.окно, то мы интервал очиститься 
+        clearInterval(modalTimerId);
+    }
 
-    // По клику в области подложки будет закрваться мод.окно
+  
+    // По клику в области подложки будет закрваться мод.окно или e.target будет х, то мы close мод окно
     modal.addEventListener('click', (e) => {
-        if(e.target ===modal) {
+        if(e.target === modal || e.target.getAttribute('data-close') == "" ) {
             closeModal();
         }
     });
+
     //мод.окно закрывает при нажати клавиши  esc
     document.addEventListener('keydown', (e) => {
         if(e.code === "Escape" && modal.classList.contains('show')) { // мод. окно реагир. на esc, только когда open.
@@ -153,7 +153,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //устанавливаем чтобы мод.окно появлялось через 10 сек.
 
-    const modalTimerId = setTimeout(showModal, 5000); //сюда ф-ю по открытию мод.окна
+    const modalTimerId = setTimeout(showModal, 50000); //сюда ф-ю по открытию мод.окна
 
     //set если user scroll стр. до конца, то появл. мод.окно
 
@@ -248,7 +248,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('form'); //получ. все формы котор. есть на стр.-e
 
     const message = {
-        loading: 'Загрузка',
+        loading: 'img/form/spinner.svg',
         success: 'Спасибо! Скоро мы  с вами свяжемся',
         failure: 'Что-то пошло не так...'
     };
@@ -263,10 +263,14 @@ window.addEventListener('DOMContentLoaded', () => {
            e.preventDefault(); //запуск, чтобы отменмть стандарт. поведение обраузера(ч.б перезагрузки стр. не было)
            //эта команда в запросах AJAX должна идти в  самом начале
            
-           const statusMessage = document.createElement('div');
-           statusMessage.classList.add('status');
-           statusMessage.textContent = message.loading;
-           form.appendChild(statusMessage);
+           const statusMessage = document.createElement('img');
+           statusMessage.src = message.loading;
+           statusMessage.style.cssText = `
+                display:block;
+                margin: 0 auto;
+           `;
+
+           form.insertAdjacentElement('afterend', statusMessage);
 
            const request = new XMLHttpRequest();
            request.open('POST', 'server.php');
@@ -306,19 +310,43 @@ window.addEventListener('DOMContentLoaded', () => {
            request.send(json);
 
            request.addEventListener('load', () =>  {
-             if  (request.status=== 200){
+             if (request.status=== 200){
                  console.log(request.response);
-                 statusMessage.textContent=message.success;
+                 showThanksModal(message.success);
                  form.reset(); //очищаем форму
-                 setTimeout(() =>{
-                     statusMessage.remove();
-             }, 3000);
+                 statusMessage.remove();        
              }else{
-                statusMessage.textContent=message.failure;
+                showThanksModal(message.failure);
              }
           });
 
         });
+    }
+
+    function showThanksModal(message) {
+         const prevModalDialog = document.querySelector(".modal__dialog");
+         
+         prevModalDialog.classList.add('hide');
+         showModal();
+        
+
+         const thanksModal = document.createElement('div');
+         thanksModal.classList.add("modal__dialog");
+         thanksModal.innerHTML = `
+             <div class="modal__content">
+                 <div class="modal__close" data-close>×</div>
+                 <div class="modal__title">${message}</div>
+             </div>
+         `;
+
+         document.querySelector('.modal').append(thanksModal);
+         setTimeout(() => {
+             thanksModal.remove();
+             prevModalDialog.classList.add('show');
+             prevModalDialog.classList.remove('hide');
+             closeModal();
+         }, 4000);
+
     }
 
 });
