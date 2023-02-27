@@ -259,7 +259,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //Создаем ф-ю котор. отвечает за постинг данных
     function postData(form) {
-        form.addEventListener('submit', (e) =>{
+      form.addEventListener('submit', (e) =>{
            e.preventDefault(); //запуск, чтобы отменмть стандарт. поведение обраузера(ч.б перезагрузки стр. не было)
            //эта команда в запросах AJAX должна идти в  самом начале
            
@@ -270,57 +270,58 @@ window.addEventListener('DOMContentLoaded', () => {
                 margin: 0 auto;
            `;
 
-           form.insertAdjacentElement('afterend', statusMessage);
+        form.insertAdjacentElement('afterend', statusMessage);     
 
-           const request = new XMLHttpRequest();
-           request.open('POST', 'server.php');
-  
+        const formData = new FormData(form);//!ВАЖНО проверять в верстке,чтобы в input ВСЕГДА был указан атрибут name=""
+
 // 1 способ using FormData
-        //!!!когда использ. связку new XMLHttpRequest() + new FormData() - то заголовок НЕНУЖНО устанавливать
-         //т.к заголовок устанавл. автоматически,если устаровить .setRequestHeader(), то будет ошибка 
-        //FormData() -обьект , котор. подготавливает данные для отправки из формы
-        //    const formData = new FormData(form); //!ВАЖНО проверять в верстке,чтобы в input ВСЕГДА был указан атрибут name=""
-        //    request.send(formData);
+// fetch('server.php', {
+//     method: "POST",
+//     //!!когда use formData заголовки не пишем!!!
+//     body: formData
+// }).then(data => data.text())
+// .then(data => {
+//     console.log(data);
+//     showThanksModal(message.success);
+//     statusMessage.remove();    
 
-        //    request.addEventListener('load', () =>  {
-        //        if (request.status=== 200){
-        //           console.log(request.response);
-        //           statusMessage.textContent=message.success;
-        //           form.reset(); //очищаем форму
-        //           setTimeout(() =>{
-        //              statusMessage.remove();
-        //           }, 3000);
-        //        }else{
-        //         statusMessage.textContent=message.failure;
-        //        }
-        //    });
+// }).catch(() => {
+//    showThanksModal(message.failure);
+// }).finally(() => {
+//     form.reset(); //очищаем форму
+// });
+
+// });
+// }
+     
 
 // 2 способ using JSON + FormData  
-        
-           request.setRequestHeader('Content-type', 'application/json' );//ч.б получить данные на JSON + php нужно добавить запись в file 'server.php'
+        const object = {};
 
-           const formData = new FormData(form);//!ВАЖНО проверять в верстке,чтобы в input ВСЕГДА был указан атрибут name=""
-        
-           const object = {};
-           formData.forEach(function(value, key) {  // получаем обычный обьект из FormData()
-                object[key] = value;
-           });
-           const json = JSON.stringify(object); //Превращаем обычный обьект в формат JSON
-        
-           request.send(json);
-
-           request.addEventListener('load', () =>  {
-             if (request.status=== 200){
-                 console.log(request.response);
-                 showThanksModal(message.success);
-                 form.reset(); //очищаем форму
-                 statusMessage.remove();        
-             }else{
-                showThanksModal(message.failure);
-             }
-          });
-
+        formData.forEach(function(value, key) {  // получаем обычный обьект из FormData()
+            object[key] = value;
         });
+        
+        fetch('server.php', {
+            method: "POST",
+            headers: {
+                'Content-type': 'application/json' 
+            },
+            body: JSON.stringify(object)//Превращаем обычный обьект в формат JSON
+        })
+        .then(data => data.text())
+        .then(data => {
+            console.log(data);
+            showThanksModal(message.success);
+            statusMessage.remove();    
+
+        }).catch(() => {
+           showThanksModal(message.failure);
+        }).finally(() => {
+            form.reset(); //очищаем форму
+        });
+
+      });
     }
 
     function showThanksModal(message) {
