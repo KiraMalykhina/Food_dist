@@ -58,8 +58,8 @@ window.addEventListener('DOMContentLoaded', () => {
             seconds=0;
         }else{
             days = Math.floor(t/(24*3600*1000)),
-            hours =Math.floor(t/(3600*1000)%24),
-            minutes=Math.floor((t/1000/60) %60),
+            hours = Math.floor(t/(3600*1000)%24),
+            minutes = Math.floor((t/1000/60) %60),
             seconds = Math.floor((t/1000) % 60);
         }
 
@@ -167,8 +167,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('scroll', showModalByscroll);
 
-    //используем классы для карточек
 
+
+    // Cards (используем классы для карточек)
     class MenuCard {
 
         constructor(src, alt, title, descr, price, parentSelector, ...classes) { //...classes - это оператор rest
@@ -222,11 +223,18 @@ window.addEventListener('DOMContentLoaded', () => {
         return await res.json();
     };
 
-    getResource('http://localhost:3000/menu')
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => {
+    //        data.forEach(({img, altimg, title, descr, price}) => {
+    //             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+    //        });
+    //     });
+
+    axios.get('http://localhost:3000/menu')
         .then(data => {
-           data.forEach(({img, altimg, title, descr, price}) => {
+            data.data.forEach(({img, altimg, title, descr, price}) => {
                 new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-           });
+            });
         });
 
 
@@ -270,7 +278,7 @@ window.addEventListener('DOMContentLoaded', () => {
         bindPostData(item);
     });
 
-    const postData = async (url, data ) => {
+    const postData = async (url, data ) => {   //ф-я отвечает за прстинг данных
         const res = await fetch(url, {
             method: "POST",
             headers: {
@@ -283,7 +291,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return await res.json();
     };
 
-    //Создаем ф-ю котор. отвечает за постинг данных
+    //Создаем ф-ю котор. отвечает за привязку постинга данных
     function bindPostData(form) {
       form.addEventListener('submit', (e) =>{
            e.preventDefault(); //запуск, чтобы отменмть стандарт. поведение обраузера(ч.б перезагрузки стр. не было)
@@ -371,4 +379,142 @@ window.addEventListener('DOMContentLoaded', () => {
 
     }
 
+
+
+    //Slider, option 2
+
+    let sliderIndex = 1;
+    let offset = 0;
+
+    const slides = document.querySelectorAll('.offer__slide'),
+          prev = document.querySelector('.offer__slider-prev'),
+          next = document.querySelector('.offer__slider-next'),
+          curent = document.querySelector('#current'), 
+          total = document.querySelector('#total'),
+          slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+          slidesField = document.querySelector('.offer__slider-inner'),
+          width = window.getComputedStyle(slidesWrapper).width;
+            
+    if (slides.length < 10) {
+        total.textContent = `0${slides.length}`;
+        curent.textContent = `0${sliderIndex}`;
+    }else {
+        total.textContent= slides.length;
+        curent.textContent= sliderIndex;
+    }
+    
+
+    slidesField.style.width = 100 * slides.length + '%';
+    slidesField.style.display = 'flex';
+    slidesField.style.transition = '0.5s all';
+
+    slidesWrapper.style.overflow = 'hidden';
+
+    slides.forEach(slide => {
+        slide.style.width = width;
+    });
+
+    next.addEventListener('click', () => {
+
+        if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)) {
+            offset = 0;
+        }else {
+            offset += +width.slice(0, width.length - 2); 
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+        
+        if(sliderIndex == slides.length) {
+            sliderIndex = 1;
+        } else {
+            sliderIndex++;
+        }
+
+        if(slides.length < 10) {
+            curent.textContent = `0${sliderIndex}`;
+        }else{
+            curent.textContent = sliderIndex;
+        }
+
+    });
+
+    prev.addEventListener('click', () => {
+
+        if (offset == 0) {     
+            offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+        }else {
+            offset -= +width.slice(0, width.length - 2); 
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        if (sliderIndex == 1) {
+            sliderIndex = slides.length;
+        } else {
+            sliderIndex--;
+        }
+
+        if (slides.length < 10) {
+            curent.textContent = `0${sliderIndex}`;
+        }else{
+            curent.textContent = sliderIndex;
+        }
+
+
+    });
+
+    //Slider, option 1
+    // showSlides(sliderIndex);
+
+    // function showSlides(n) {
+
+    //     if(n > slides.length){
+    //         sliderIndex = 1;
+    //     }
+
+    //     if (n < 1) {
+    //         sliderIndex = slides.length;
+    //     }
+
+    //     hideSlides();
+
+    //     slides[sliderIndex - 1].classList.add('show', 'fade');
+    //     slides[sliderIndex - 1].classList.remove('hide');
+
+    //     if (sliderIndex < 10) {
+    //         curent.innerHTML= '0' + sliderIndex;
+    //         total.innerHTML= '0' + slides.length;
+    //     }else {
+    //         curent.innerHTML= sliderIndex;
+    //         total.innerHTML= slides.length;
+    //     }
+    // }
+
+    // function hideSlides() {
+
+    //     slides.forEach(slide => {
+
+    //         slide.classList.add('hide');
+    //         slide.classList.remove('show', 'fade');
+    //     });
+    // }
+
+    // function plusSlide (n) {
+
+    //     showSlides(sliderIndex +=n);
+    // }
+
+    // next.addEventListener('click', () => {
+
+    //     plusSlide(1);
+
+    // });
+
+    // prev.addEventListener('click', () => {
+
+    //     plusSlide(-1);
+
+    // });
+
 });
+
