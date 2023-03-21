@@ -1,21 +1,34 @@
 "use strict";
 
-window.addEventListener('DOMContentLoaded', () => {
-     const tabs = require('./modules/tabs'),
-           modal = require('./modules/modal'),
-           timer = require('./modules/timer'),
-           cards = require('./modules/cards'),
-           slider = require('./modules/slider'),
-           calc = require('./modules/calc'),
-           forms = require('./modules/forms');
+import tabs from './modules/tabs';
+import modal from './modules/modal';
+import timer from './modules/timer';
+import cards from './modules/cards';
+import slider from './modules/slider';
+import calc from './modules/calc';
+import forms  from './modules/forms';
+import {showModal} from './modules/modal';
 
-    tabs();
-    modal();
-    timer();
+window.addEventListener('DOMContentLoaded', () => {
+
+    const modalTimerId = setTimeout(() => showModal('.modal', modalTimerId), 300000); //сюда ф-ю по открытию мод.окна
+    
+    tabs('.tabheader__item', '.tabcontent', '.tabheader__items', 'tabheader__item_active');
+    modal('[data-modal]', '.modal', modalTimerId);
+    timer('.timer', '2023-05-24');
     cards();
-    slider();
+    slider({
+        container: '.offer__slider',
+        nextArrow: '.offer__slider-next',
+        prevArrow: '.offer__slider-prev',
+        slide: '.offer__slide',
+        totalCounter: '#total',
+        currentCounter: '#current',
+        wrapper: '.offer__slider-wrapper',
+        field: '.offer__slider-inner'
+    });
     calc();
-    forms();
+    forms('form', modalTimerId);
 
     // axios.get('http://localhost:3000/menu')
     //     .then(data => {
